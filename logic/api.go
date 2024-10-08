@@ -38,7 +38,7 @@ func DatabaseDiff(data *db.CompareData) (dir string, err error) {
 		return dir, err
 	}
 	if ddlDiff != nil {
-		dir, err = util.WriteLineToFile(ddlDiff, data.Common.Path, fmt.Sprintf("V%s_%s.sql", timeStamp, data.Common.Ddl))
+		dir, err = util.WriteLineToFile(ddlDiff, data.Common.Path, fmt.Sprintf("V%s__%s.sql", timeStamp, data.Common.Ddl))
 		if err != nil {
 			log.Printf("write file error: %v", err)
 			return dir, err
@@ -51,7 +51,7 @@ func DatabaseDiff(data *db.CompareData) (dir string, err error) {
 		return dir, err
 	}
 	if dmlDiff != nil {
-		_, err = util.WriteLineToFile(dmlDiff, data.Common.Path, fmt.Sprintf("V%s_%s.sql", timeStamp, data.Common.Dml))
+		dir, err = util.WriteLineToFile(dmlDiff, data.Common.Path, fmt.Sprintf("V%s__%s.sql", timeStamp, data.Common.Dml))
 		if err != nil {
 			log.Printf("write file error: %v", err)
 			return dir, err
