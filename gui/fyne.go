@@ -10,6 +10,12 @@ func NewEntry(data string) *widget.Entry {
 	return entry
 }
 
+func NewPswEntry(data string) *widget.Entry {
+	entry := NewEntry(data)
+	entry.Password = true
+	return entry
+}
+
 func FlipForm(formA *widget.Form, formB *widget.Form) {
 	for i, sourceItem := range formA.Items {
 		sourceEntry := sourceItem.Widget.(*widget.Entry)

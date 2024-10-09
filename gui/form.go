@@ -39,7 +39,7 @@ func dbData2Form(data *db.Db) *widget.Form {
 		widget.NewFormItem("host", NewEntry(data.Host)),
 		widget.NewFormItem("port", NewEntry(data.Port)),
 		widget.NewFormItem("user", NewEntry(data.User)),
-		widget.NewFormItem("psw", NewEntry(data.Psw)),
+		widget.NewFormItem("psw", NewPswEntry(data.Psw)),
 	)
 }
 
