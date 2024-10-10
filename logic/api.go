@@ -24,13 +24,23 @@ func DatabaseDiff(data *db.CompareData) (dir string, err error) {
 		return dir, err
 	}
 	defer util.Close(sourceDB)
+	err = sourceDB.Ping()
+	if err != nil {
+		log.Printf("db ping error: %v", err)
+		return dir, err
+	}
 
 	targetDB, err := sql.Open("mysql", targetDSN)
 	if err != nil {
-		log.Printf("db open error: %v", err)
+		log.Printf("source_db open error: %v", err)
 		return dir, err
 	}
 	defer util.Close(targetDB)
+	err = targetDB.Ping()
+	if err != nil {
+		log.Printf("target_db ping error: %v", err)
+		return dir, err
+	}
 
 	ddlDiff, err := structDiff(sourceDB, targetDB)
 	if err != nil {

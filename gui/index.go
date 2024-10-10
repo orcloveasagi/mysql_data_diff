@@ -1,9 +1,11 @@
 package gui
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 )
 
 var (
@@ -38,4 +40,12 @@ func updateNav(objects ...fyne.CanvasObject) {
 func updateForm(objects ...fyne.CanvasObject) {
 	Form.Objects = objects
 	Form.Refresh()
+}
+
+func showError(err error) {
+	dialog.ShowError(err, MainWindow)
+}
+
+func showSuccess(dir string) {
+	dialog.ShowInformation("Success", fmt.Sprintf("files generated in %s", dir), MainWindow)
 }

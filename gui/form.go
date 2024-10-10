@@ -10,10 +10,16 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+const (
+	formDb   = "db"
+	formName = "name"
+)
+
 func createForm(data *db.CompareData) *fyne.Container {
 	sourceForm := dbData2Form(data.Source)
 	targetForm := dbData2Form(data.Target)
 	commonForm := commonData2Form(data.Common)
+	updateName(sourceForm, targetForm, commonForm)
 	flipButton := widget.NewButton("FLIP", func() {
 		FlipForm(sourceForm, targetForm)
 	})
@@ -33,9 +39,37 @@ func createForm(data *db.CompareData) *fyne.Container {
 	)
 }
 
+func updateName(source *widget.Form, target *widget.Form, common *widget.Form) {
+	var name string
+	for i, item := range source.Items {
+		if item.Text == formDb {
+			sourceEntry := item.Widget.(*widget.Entry)
+			targetEntry := target.Items[i].Widget.(*widget.Entry)
+			name = sourceEntry.Text + " ==> " + targetEntry.Text
+			if sourceEntry.OnChanged == nil {
+				sourceEntry.OnChanged = func(s string) {
+					updateName(source, target, common)
+				}
+			}
+			if targetEntry.OnChanged == nil {
+				targetEntry.OnChanged = func(s string) {
+					updateName(source, target, common)
+				}
+			}
+			break
+		}
+	}
+	for _, item := range common.Items {
+		if item.Text == formName {
+			item.Widget.(*widget.Entry).SetText(name)
+			break
+		}
+	}
+}
+
 func dbData2Form(data *db.Db) *widget.Form {
 	return widget.NewForm(
-		widget.NewFormItem("db", NewEntry(data.Db)),
+		widget.NewFormItem(formDb, NewEntry(data.Db)),
 		widget.NewFormItem("host", NewEntry(data.Host)),
 		widget.NewFormItem("port", NewEntry(data.Port)),
 		widget.NewFormItem("user", NewEntry(data.User)),
@@ -49,7 +83,7 @@ func form2DbData(form *widget.Form) *db.Db {
 		formKV[value.Text] = value.Widget.(*widget.Entry).Text
 	}
 	return &db.Db{
-		Db:   formKV["db"],
+		Db:   formKV[formDb],
 		Host: formKV["host"],
 		Port: formKV["port"],
 		User: formKV["user"],
@@ -59,7 +93,7 @@ func form2DbData(form *widget.Form) *db.Db {
 
 func commonData2Form(data *db.Common) *widget.Form {
 	return widget.NewForm(
-		widget.NewFormItem("name", NewEntry(data.Name)),
+		widget.NewFormItem(formName, NewEntry(data.Name)),
 		widget.NewFormItem("path", NewEntry(data.Path)),
 		widget.NewFormItem("ddl", NewEntry(data.Ddl)),
 		widget.NewFormItem("dml", NewEntry(data.Dml)),
@@ -75,7 +109,7 @@ func form2CommonData(form *widget.Form) *db.Common {
 		Path: formKV["path"],
 		Ddl:  formKV["ddl"],
 		Dml:  formKV["dml"],
-		Name: formKV["name"],
+		Name: formKV[formName],
 	}
 }
 
@@ -89,6 +123,7 @@ func onExec(sourceForm, targetForm, commonForm *widget.Form, id int64) {
 	dir, err := logic.DatabaseDiff(formData)
 	if err != nil {
 		fyne.LogError("exec error", err)
+		showError(err)
 		return
 	}
 	err = util.OpenExplorer(dir)
@@ -110,4 +145,5 @@ func onExec(sourceForm, targetForm, commonForm *widget.Form, id int64) {
 		refreshMenuData()
 		updateNav(makeNav())
 	}
+	showSuccess(dir)
 }
